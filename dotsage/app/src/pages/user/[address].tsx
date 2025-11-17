@@ -19,7 +19,9 @@ type Question = {
 export default function UserProfile() {
 	const router = useRouter();
 	const { address } = router.query;
-	const userAddress = address ? String(address) : null;
+	
+	// Parse user address from route parameter (decode URL-encoded addresses)
+	const userAddress = router.isReady && address ? decodeURIComponent(String(address)) : null;
 
 	const [questions, setQuestions] = useState<Question[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -32,7 +34,12 @@ export default function UserProfile() {
 	} | null>(null);
 
 	useEffect(() => {
-		if (!userAddress) {
+		// Wait for router to be ready
+		if (!router.isReady) {
+			return;
+		}
+
+		if (!userAddress || userAddress.trim().length === 0) {
 			setLoading(false);
 			setErrorMsg("Invalid user address");
 			return;
@@ -82,7 +89,7 @@ export default function UserProfile() {
 				setLoading(false);
 			}
 		})();
-	}, [userAddress]);
+	}, [userAddress, router.isReady]);
 
 	const formatAddress = (addr: string) => {
 		return `${addr.slice(0, 12)}...${addr.slice(-8)}`;

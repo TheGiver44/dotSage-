@@ -455,8 +455,10 @@ export default function Explore() {
 							</div>
 							<p style={{ marginTop: 8, marginBottom: 8 }}>{q.text}</p>
 							<div style={{ fontSize: "12px", color: "var(--muted)", marginBottom: "12px" }}>
-								By: <Link href={`/user/${q.author}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
-									<code style={{ color: "var(--accent)", fontSize: "11px", cursor: "pointer" }}>{q.author.slice(0, 12)}...{q.author.slice(-6)}</code>
+								By: <Link href={`/user/${encodeURIComponent(q.author)}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
+									<code style={{ color: "var(--accent)", fontSize: "11px", cursor: "pointer" }}>
+										{q.author.length > 18 ? `${q.author.slice(0, 12)}...${q.author.slice(-6)}` : q.author}
+									</code>
 								</Link>
 							</div>
 							<div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12, flexWrap: "wrap" }}>

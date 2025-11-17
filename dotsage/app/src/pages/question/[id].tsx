@@ -20,7 +20,9 @@ type Question = {
 export default function QuestionDetail() {
 	const router = useRouter();
 	const { id } = router.query;
-	const questionId = id ? Number(id) : null;
+	
+	// Parse question ID from route parameter (handle both string and number)
+	const questionId = router.isReady && id ? (typeof id === "string" ? Number(id) : Number(id)) : null;
 
 	const [question, setQuestion] = useState<Question | null>(null);
 	const [answer, setAnswer] = useState<string>("");
@@ -31,7 +33,12 @@ export default function QuestionDetail() {
 	const [voting, setVoting] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (!questionId || isNaN(questionId)) {
+		// Wait for router to be ready
+		if (!router.isReady) {
+			return;
+		}
+
+		if (!questionId || isNaN(questionId) || questionId < 0) {
 			setLoading(false);
 			setErrorMsg("Invalid question ID");
 			return;
@@ -75,7 +82,7 @@ export default function QuestionDetail() {
 				setLoading(false);
 			}
 		})();
-	}, [questionId]);
+	}, [questionId, router.isReady]);
 
 	const onVote = async (isUp: boolean) => {
 		if (!question) return;
@@ -162,7 +169,13 @@ export default function QuestionDetail() {
 						</div>
 						<p style={{ fontSize: "18px", lineHeight: "1.6", margin: "8px 0", color: "var(--text)" }}>{question.text}</p>
 						<div style={{ display: "flex", gap: "16px", marginTop: "12px", fontSize: "14px", color: "var(--muted)", flexWrap: "wrap" }}>
-							<span>By: <code style={{ color: "var(--accent)", fontSize: "12px" }}>{question.author.slice(0, 16)}...{question.author.slice(-8)}</code></span>
+							<span>
+								By: <Link href={`/user/${question.author}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
+									<code style={{ color: "var(--accent)", fontSize: "12px", cursor: "pointer" }}>
+										{question.author.length > 24 ? `${question.author.slice(0, 16)}...${question.author.slice(-8)}` : question.author}
+									</code>
+								</Link>
+							</span>
 							<span>{new Date(question.createdAt).toLocaleString()}</span>
 						</div>
 					</div>
