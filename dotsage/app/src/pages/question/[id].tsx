@@ -170,7 +170,7 @@ export default function QuestionDetail() {
 						<p style={{ fontSize: "18px", lineHeight: "1.6", margin: "8px 0", color: "var(--text)" }}>{question.text}</p>
 						<div style={{ display: "flex", gap: "16px", marginTop: "12px", fontSize: "14px", color: "var(--muted)", flexWrap: "wrap" }}>
 							<span>
-								By: <Link href={`/user/${question.author}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
+								By: <Link href={`/user/${encodeURIComponent(question.author)}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
 									<code style={{ color: "var(--accent)", fontSize: "12px", cursor: "pointer" }}>
 										{question.author.length > 24 ? `${question.author.slice(0, 16)}...${question.author.slice(-8)}` : question.author}
 									</code>
