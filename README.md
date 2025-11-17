@@ -562,6 +562,7 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=5F...
 - ⛓️ [On-Chain Setup](./dotsage/docs/ONCHAIN_SETUP.md) - Contract deployment guide
 - 💰 [Groq Pricing Guide](./dotsage/docs/GROQ_PRICING_GUIDE.md) - AI API costs
 - 📝 [Changelog](./CHANGELOG.md) - Project history and updates
+- 🎬 [Demo Script](./DEMO_SCRIPT.md) - Hackathon presentation guide
 
 ---
 
