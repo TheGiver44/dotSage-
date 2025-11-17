@@ -4,18 +4,9 @@ import Link from "next/link";
 import Navigation from "@components/Navigation";
 import { fetchRecentQuestions, voteOnQuestion } from "@lib/polkadot";
 import { getAiAnswer } from "@lib/api";
+import { getExampleQuestion, isExampleQuestionId, type Question } from "@lib/exampleQuestions";
 
 type Category = "Docs" | "Builders" | "Governance" | "Ecosystem";
-
-type Question = {
-	id: number;
-	author: string;
-	text: string;
-	category: Category;
-	createdAt: number;
-	upvotes: number;
-	downvotes: number;
-};
 
 export default function QuestionDetail() {
 	const router = useRouter();
@@ -50,7 +41,12 @@ export default function QuestionDetail() {
 			try {
 				// Fetch questions and find the one with matching ID
 				const questions = await fetchRecentQuestions({ offset: 0, limit: 100 });
-				const found = questions.find((q) => q.id === questionId);
+				let found = questions.find((q) => q.id === questionId);
+				
+				// If not found in real questions, check example questions
+				if (!found && isExampleQuestionId(questionId)) {
+					found = getExampleQuestion(questionId);
+				}
 				
 				if (!found) {
 					setErrorMsg("Question not found");
@@ -76,6 +72,32 @@ export default function QuestionDetail() {
 					setLoadingAnswer(false);
 				}
 			} catch (err) {
+				// If fetch fails, check if it's an example question
+				if (isExampleQuestionId(questionId)) {
+					const found = getExampleQuestion(questionId);
+					if (found) {
+						setQuestion(found);
+						
+						// Try to fetch AI answer for example question
+						setLoadingAnswer(true);
+						try {
+							const resp = await getAiAnswer({
+								text: found.text,
+								category: found.category,
+							});
+							setAnswer(resp.answer);
+							setSources(resp.sources ?? []);
+						} catch (answerErr) {
+							console.error("Failed to fetch answer:", answerErr);
+							setErrorMsg("Failed to fetch AI answer. Please try again.");
+						} finally {
+							setLoadingAnswer(false);
+						}
+						setLoading(false);
+						return;
+					}
+				}
+				
 				const errorMessage = err instanceof Error ? err.message : "Failed to fetch question.";
 				setErrorMsg(errorMessage);
 			} finally {
@@ -86,6 +108,13 @@ export default function QuestionDetail() {
 
 	const onVote = async (isUp: boolean) => {
 		if (!question) return;
+		
+		// Check if this is an example question
+		const isExample = isExampleQuestionId(question.id);
+		if (isExample) {
+			alert("Example questions are read-only. Connect to the blockchain and deploy questions to enable voting.");
+			return;
+		}
 		
 		setVoting(true);
 		try {
@@ -191,19 +220,32 @@ export default function QuestionDetail() {
 
 				{/* Voting Buttons */}
 				<div style={{ display: "flex", gap: "12px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
+					{isExampleQuestionId(question.id) && (
+						<div style={{ 
+							padding: "8px 12px", 
+							background: "rgba(255, 193, 7, 0.1)", 
+							border: "1px solid rgba(255, 193, 7, 0.3)", 
+							borderRadius: "6px",
+							fontSize: "14px",
+							color: "var(--text)",
+							marginBottom: "8px"
+						}}>
+							ℹ️ Example question - voting disabled
+						</div>
+					)}
 					<button 
 						className="btn secondary" 
 						onClick={() => void onVote(true)} 
-						disabled={voting}
-						style={{ padding: "10px 20px" }}
+						disabled={voting || isExampleQuestionId(question.id)}
+						style={{ padding: "10px 20px", opacity: isExampleQuestionId(question.id) ? 0.5 : 1 }}
 					>
 						↑ Upvote
 					</button>
 					<button 
 						className="btn secondary" 
 						onClick={() => void onVote(false)} 
-						disabled={voting}
-						style={{ padding: "10px 20px" }}
+						disabled={voting || isExampleQuestionId(question.id)}
+						style={{ padding: "10px 20px", opacity: isExampleQuestionId(question.id) ? 0.5 : 1 }}
 					>
 						↓ Downvote
 					</button>

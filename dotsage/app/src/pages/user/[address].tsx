@@ -3,18 +3,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Navigation from "@components/Navigation";
 import { fetchRecentQuestions, voteOnQuestion } from "@lib/polkadot";
+import { getExampleQuestionsForUser, hasExampleQuestions, type Question } from "@lib/exampleQuestions";
 
 type Category = "Docs" | "Builders" | "Governance" | "Ecosystem";
-
-type Question = {
-	id: number;
-	author: string;
-	text: string;
-	category: Category;
-	createdAt: number;
-	upvotes: number;
-	downvotes: number;
-};
 
 export default function UserProfile() {
 	const router = useRouter();
@@ -51,7 +42,12 @@ export default function UserProfile() {
 			try {
 				// Fetch all questions and filter by user address
 				const allQuestions = await fetchRecentQuestions({ offset: 0, limit: 100 });
-				const userQuestions = allQuestions.filter((q) => q.author.toLowerCase() === userAddress.toLowerCase());
+				let userQuestions = allQuestions.filter((q) => q.author.toLowerCase() === userAddress.toLowerCase());
+
+				// If no questions found, check example questions
+				if (userQuestions.length === 0 && hasExampleQuestions(userAddress)) {
+					userQuestions = getExampleQuestionsForUser(userAddress);
+				}
 
 				if (userQuestions.length === 0) {
 					setErrorMsg("No questions found for this user.");
@@ -83,6 +79,38 @@ export default function UserProfile() {
 					categories,
 				});
 			} catch (err) {
+				// If fetch fails, check if user has example questions
+				if (hasExampleQuestions(userAddress)) {
+					const userQuestions = getExampleQuestionsForUser(userAddress);
+					if (userQuestions.length > 0) {
+						setQuestions(userQuestions.sort((a, b) => b.createdAt - a.createdAt));
+
+						// Calculate stats
+						const totalVotes = userQuestions.reduce((sum, q) => sum + q.upvotes + q.downvotes, 0);
+						const totalScore = userQuestions.reduce((sum, q) => sum + (q.upvotes - q.downvotes), 0);
+						
+						const categories: Record<Category, number> = {
+							Docs: 0,
+							Builders: 0,
+							Governance: 0,
+							Ecosystem: 0,
+						};
+
+						userQuestions.forEach((q) => {
+							categories[q.category]++;
+						});
+
+						setStats({
+							questionCount: userQuestions.length,
+							totalVotes,
+							totalScore,
+							categories,
+						});
+						setLoading(false);
+						return;
+					}
+				}
+				
 				const errorMessage = err instanceof Error ? err.message : "Failed to fetch user questions.";
 				setErrorMsg(errorMessage);
 			} finally {
@@ -162,6 +190,19 @@ export default function UserProfile() {
 				}}>
 					{formatAddress(userAddress)}
 				</code>
+				{hasExampleQuestions(userAddress) && questions.every(q => getExampleQuestionsForUser(userAddress).some(eq => eq.id === q.id)) && (
+					<div style={{ 
+						padding: "12px 16px", 
+						background: "rgba(255, 193, 7, 0.1)", 
+						border: "1px solid rgba(255, 193, 7, 0.3)", 
+						borderRadius: "6px",
+						fontSize: "14px",
+						color: "var(--text)",
+						marginTop: "16px"
+					}}>
+						ℹ️ Showing example questions - connect to the blockchain to see real user data
+					</div>
+				)}
 
 				{/* Stats */}
 				<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "16px", marginTop: "24px" }}>
