@@ -1,0 +1,147 @@
+# Sensitive Files
+notes.md
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+*.secret
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.env
+.envrc
+
+# API Keys & Credentials
+**/api-keys.txt
+**/credentials.json
+**/secrets.json
+**/*secret*
+**/*key*
+**/*password*
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# Rust / Cargo
+target/
+**/target/
+Cargo.lock
+*.pdb
+*.dll
+*.so
+*.dylib
+
+# Contract Build Artifacts (keep metadata.json but ignore build artifacts)
+**/target/ink/*.wasm
+**/target/ink/*.contract
+**/target/ink/release/
+**/target/ink/debug/
+**/target/ink/wasm32-unknown-unknown/
+**/target/ink/deps/
+**/target/ink/examples/
+**/target/ink/incremental/
+**/target/ink/build/
+**/target/ink/.cargo/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+/tmp/
+/tmp/dotsage-*.log
+.notes/*.md
+notes.md
+
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+.directory
+
+# IDE / Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+*.iml
+.project
+.classpath
+.settings/
+*.sublime-*
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+*.cache
+.cache/
+
+# Package Manager Locks (optional - uncomment if you want to ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
+.vercel
+.netlify
+.turbo
+
+# Contract Instantiation Output (may contain sensitive addresses)
+/tmp/dotsage_instantiate.json
+**/instantiate.json
+**/*instantiate*.json
+
+# Local Development
+.local/
+.localhost/
+*.local
+
